@@ -2,6 +2,9 @@ FileManager::Application.routes.draw do
 
   root to: 'manager#index'
 
+  get 'ls' => 'manager#ls'
+  get 'ls/*path' => 'manager#ls'
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
