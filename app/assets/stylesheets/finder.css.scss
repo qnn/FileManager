@@ -1,9 +1,14 @@
+$min: 300px;
+
 html {
   height: 100%;
 }
 
 body {
   height: 100%;
+  min-width: $min;
+  min-height: $min;
+  overflow: hidden;
 }
 
 #finder {
@@ -14,8 +19,7 @@ body {
     width: 100%;
     height: 100%;
     position: absolute;
-    min-width: 300px;
-    min-height: 300px;
+    z-index: 5;
     .corner {
       position: absolute;
       z-index: 10;
@@ -74,6 +78,49 @@ body {
       width: 150px;
       height: 100%;
       background: url(/assets/finder_y_repeat_right.png) repeat-y;
+    }
+  }
+  .left-placeholder, .right-placeholder {
+    display: table-cell;
+    width: 60px;
+  }
+  .title {
+    display: table;
+    table-layout: fixed;
+    position: absolute;
+    z-index: 20;
+    top: 38px;
+    width: 100%;
+    .left-placeholder, .right-placeholder {
+      width: 125px;
+    }
+    .center {
+      display: table-cell;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      text-align: center;
+      font-family: Lucida Grande;
+      font-size: 13px;
+      text-shadow: 0 1px #DBDBDB;
+    }
+  }
+  .foot {
+    display: table;
+    table-layout: fixed;
+    position: absolute;
+    z-index: 20;
+    bottom: 83px;
+    width: 100%;
+    .center {
+      display: table-cell;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      text-align: center;
+      font-family: Lucida Grande;
+      font-size: 12px;
+      text-shadow: 0 1px #DBDBDB;
     }
   }
 }
