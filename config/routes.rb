@@ -2,7 +2,7 @@ FileManager::Application.routes.draw do
 
   root to: 'manager#index'
 
-  get 'ls' => 'manager#ls'
+  get 'ls' => 'manager#ls', as: :list_files
   get 'ls/*path' => 'manager#ls'
 
   # The priority is based upon order of creation: first created -> highest priority.

@@ -158,18 +158,36 @@ body {
 }
 
 #columns {
-  display: table;
-  table-layout: fixed;
-  height: 100%;
-  list-style: none;
-  > li {
-    display: table-cell;
-    width: 150px;
-    ul.column {
-      list-style: none;
-      li {
-        padding: 5px;
-      }
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: auto;
+  ul.columns {
+    display: table;
+    table-layout: fixed;
+    height: 100%;
+    list-style: none;
+    li {
+      display: table-cell;
+      width: 150px;
+    }
+  }
+  ul.column {
+    list-style: none;
+    li {
+      display: block;
+    }
+  }
+  a {
+    display: block;
+    text-decoration: none;
+    color: #000;
+    font-size: 13px;
+    cursor: default;
+    padding: 3px;
+    &.active {
+      background: #3970d6;
+      color: #fff;
     }
   }
 }

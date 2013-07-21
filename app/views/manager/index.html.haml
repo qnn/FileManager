@@ -9,11 +9,12 @@
       .vtable
         .top-placeholder
         .vcenter
-          %ul#columns
-            %li
-              %ul.column
-                %li
-                  %a{ href: '/' } link
+          #columns{ data: { ls_path: list_files_path } }
+            %ul.columns
+              %li
+                %ul.column
+                  %li
+                    %a{ href: '/' } link
         .bottom-placeholder
     .right-placeholder
   .foot
