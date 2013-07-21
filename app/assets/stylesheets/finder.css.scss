@@ -130,6 +130,9 @@ body {
     z-index: 18;
     height: 100%;
     width: 100%;
+    .left-placeholder, .right-placeholder {
+      width: 57px;
+    }
     .center {
       display: table-cell;
       width: 100%;
@@ -144,11 +147,11 @@ body {
       height: 100%;
       .top-placeholder {
         display: table-row;
-        height: 81px;
+        height: 78px;
       }
       .bottom-placeholder {
         display: table-row;
-        height: 106px;
+        height: 103px;
       }
       .vcenter {
         display: table-row;
@@ -161,20 +164,19 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  overflow: auto;
+  overflow: hidden;
   ul.columns {
-    display: table;
-    table-layout: fixed;
     height: 100%;
     list-style: none;
-    li {
-      display: table-cell;
-      width: 150px;
+    > li {
+      overflow: auto;
+      width: 180px;
+      border-right: 1px solid #E0E0E0;
     }
   }
   ul.column {
     list-style: none;
-    li {
+    > li {
       display: block;
     }
   }

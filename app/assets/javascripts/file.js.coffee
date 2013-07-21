@@ -12,13 +12,15 @@ jQuery ($) ->
 
   # resize columns
   resize_columns = ->
-    parent = $('#columns').parent()
+    parent = $('#columns_container')
+    height = parent.height()
     $('#columns').css({
       top: parent.position().top,
       left: parent.position().left,
       width: parent.width(),
-      height: parent.height()
+      height: height
     })
+    $('.columns > li').height(height)
   resize_columns()
   $(window).resize ->
     resize_columns()
