@@ -7,9 +7,15 @@ class ManagerController < ApplicationController
     path = params[:path] || '/'
     begin
       Dir.chdir(File.join(Dir.home, path))
-      files = Dir.entries('.')
-      files.delete('.')
-      files.delete('..')
+      files = []
+      Dir.foreach('.') do |file|
+        stat = File.stat(file)
+        files << {
+          name: file,
+          directory?: stat.directory?,
+          size: stat.size
+        }
+      end
       render json: files
     rescue Errno::ENOENT
       render nothing: true, status: 404

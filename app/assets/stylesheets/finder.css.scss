@@ -180,16 +180,31 @@ body {
       display: block;
     }
   }
-  a {
+}
+
+a.file {
+  display: block;
+  text-decoration: none;
+  color: #000;
+  font-size: 13px;
+  cursor: default;
+  padding: 3px;
+  span.icon {
+    float: left;
     display: block;
-    text-decoration: none;
-    color: #000;
-    font-size: 13px;
-    cursor: default;
-    padding: 3px;
-    &.active {
-      background: #3970d6;
-      color: #fff;
-    }
+    width: 16px;
+    height: 16px;
+    background: url(/assets/icons.png) no-repeat 0 0;
+    margin: -2px 6px 0 2px;
+  }
+  &.active {
+    background: #3970d6;
+    color: #fff;
+  }
+}
+
+a.not_dir {
+  span.icon {
+    background-position: 0 -16px;
   }
 }

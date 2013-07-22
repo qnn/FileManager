@@ -3,11 +3,14 @@ jQuery ($) ->
   $.getJSON list_files_path, (d) ->
     $('#columns ul.column').empty();
     $.each d, (a,b) ->
-      $('#columns ul.column').append('<li><a href="#">'+b+'</a</li>')
+      if b.name == "." or b.name == ".."
+        return true
+      type = if b['directory?'] then "dir" else "not_dir"
+      $('#columns ul.column').append('<li><a class="file '+type+'" href="#"><span class="icon"></span>'+b.name+'</a></li>')
 
-  $(document).on 'click', '.column a', (e) ->
+  $(document).on 'click', 'a.file', (e) ->
     e.preventDefault()
-    $('.column a').removeClass('active')
+    $('a.file').removeClass('active')
     $(this).addClass('active')
 
   # resize columns
