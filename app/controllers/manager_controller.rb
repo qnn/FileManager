@@ -32,6 +32,7 @@ class ManagerController < ApplicationController
           size: stat.size
         }
       end
+      files = files.select{ |file| file[:directory?] } + files.select{ |file| !file[:directory?] }
       render json: files
     rescue Errno::ENOENT
       render nothing: true, status: 404

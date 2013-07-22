@@ -31,11 +31,12 @@ file_js_onload = ->
   load_file_list($('#columns ul.column[data-ls-path]:first'))
 
   $(document).on 'click', 'a.file', (e) ->
+    column = $(this).closest('ul.column')
     e.preventDefault()
-    $('a.file').removeClass('active')
+    column.find('a.file').removeClass('active')
     $(this).addClass('active')
     if $(this).hasClass('dir')
-      load_file_list create_new_list($(this).data('path'), $(this).closest('ul.column'))
+      load_file_list create_new_list($(this).data('path'), column)
 
   $(document).on 'dblclick', 'a.file', (e) ->
     location.href = $(this).attr('href')
