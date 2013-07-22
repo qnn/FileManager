@@ -7,7 +7,9 @@ file_js_onload = ->
     path = column_element.data('ls-path')
     $.getJSON path, (d) ->
       # find next column
-      next_column = column_element.parent().next('li').find('ul.column[data-ls-path]')
+      column_parent = column_element.parent()
+      column_height = column_parent.height()
+      next_column = column_parent.next('li').find('ul.column[data-ls-path]')
       next_column_ls_path = null
       if next_column.length > 0
         load_file_list next_column
@@ -26,8 +28,12 @@ file_js_onload = ->
           html: '<span class="icon"></span>'+b.name
         })
         anchor.data('path', path+b.name)
-        if b.name is next_column_ls_path then anchor.addClass('active')
         column_element.append($('<li />').append(anchor))
+        # select
+        if b.name is next_column_ls_path
+          anchor.addClass('active')
+          if anchor.position().top > column_height - 20 # scroll to visible area
+            column_parent.animate({ scrollTop: anchor.position().top - column_height / 2 }, 1);
 
   create_new_list = (path, after_element) ->
     parent = after_element.parent()
