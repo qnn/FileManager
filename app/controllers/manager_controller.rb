@@ -3,8 +3,24 @@ class ManagerController < ApplicationController
   def index
     path = params[:path] || '/'
 
-    # if not at root path
-    unless request.fullpath == '/'
+    @ls_paths = []
+
+    if request.fullpath == '/' # root
+
+      if session.has_key?(:path)
+        session_path = session[:path]
+        if Dir.exist?(get_path(session_path))
+          path = ""
+          session_path = "/" + session_path
+          session_path.split(File::SEPARATOR).each do |_path|
+            path = File.join(path, _path)
+            break unless Dir.exist?(get_path(path))
+            @ls_paths << File.join(list_files_path, path).chomp('/')
+          end
+        end
+      end
+
+    else  #  not at root path: /open/
       redirect_to root_path and return if path == '/'  #  /open/ redirects to root
       unless Dir.exist?(get_path(path))  #  dir does not exist
         _path = get_path(path)
@@ -16,13 +32,18 @@ class ManagerController < ApplicationController
       end
     end
 
-    @ls_path = File.join(list_files_path, path).chomp('/')
+    if @ls_paths.empty?
+      @ls_paths = [File.join(list_files_path, path).chomp('/')]
+    end
   end
 
   def ls
     path = params[:path] || '/'
     begin
       Dir.chdir(get_path(path))
+
+      session[:path] = path
+
       files = []
       Dir.foreach('.') do |file|
         stat = File.stat(file)

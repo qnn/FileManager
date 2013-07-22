@@ -11,9 +11,10 @@
         #columns_container.vcenter
           #columns{ data: { list_files_path: list_files_path } }
             %ul.columns
-              %li
-                %ul.column{ data: { ls_path: @ls_path } }
-                  %li
+              - @ls_paths.each do |ls_path|
+                %li
+                  %ul.column{ data: { ls_path: ls_path } }
+                    %li
         .bottom-placeholder
     .right-placeholder
   .foot

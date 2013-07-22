@@ -6,6 +6,13 @@ file_js_onload = ->
   load_file_list = (column_element) ->
     path = column_element.data('ls-path')
     $.getJSON path, (d) ->
+      # find next column
+      next_column = column_element.parent().next('li').find('ul.column[data-ls-path]')
+      next_column_ls_path = null
+      if next_column.length > 0
+        load_file_list next_column
+        next_column_ls_path = next_column.data('ls-path').replace(/^.*[\\\/]/, '')
+
       column_element.empty();
       path = '/' + path.replace(/^\/ls/, '') + '/'
       path = path.replace(/^\/*/, '/').replace(/\/*$/, '/')
@@ -19,6 +26,7 @@ file_js_onload = ->
           html: '<span class="icon"></span>'+b.name
         })
         anchor.data('path', path+b.name)
+        if b.name is next_column_ls_path then anchor.addClass('active')
         column_element.append($('<li />').append(anchor))
 
   create_new_list = (path, after_element) ->
