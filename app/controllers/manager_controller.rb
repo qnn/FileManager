@@ -5,8 +5,15 @@ class ManagerController < ApplicationController
 
     # if not at root path
     unless request.fullpath == '/'
-      redirect_to root_path if path == '/'  #  /open/ redirects to root
-      redirect_to root_path unless Dir.exist?(get_path(path))  #  dir does not exist
+      redirect_to root_path and return if path == '/'  #  /open/ redirects to root
+      unless Dir.exist?(get_path(path))  #  dir does not exist
+        _path = get_path(path)
+        begin
+          _path = File.expand_path("..", _path)
+        end while not Dir.exist?(_path)
+        _path.sub!(get_path('/').chomp('/'), '')
+        redirect_to File.join(open_files_path, _path) and return
+      end
     end
 
     @ls_path = File.join(list_files_path, path).chomp('/')

@@ -3,10 +3,10 @@ FileManager::Application.routes.draw do
   root to: 'manager#index'
 
   get 'open' => 'manager#index', as: :open_files
-  get 'open/*path' => 'manager#index'
+  get 'open/*path' => 'manager#index', format: false
 
   get 'ls' => 'manager#ls', as: :list_files
-  get 'ls/*path' => 'manager#ls'
+  get 'ls/*path' => 'manager#ls', format: false
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

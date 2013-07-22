@@ -1,7 +1,7 @@
 file_js_onload = ->
   list_files_path = $('#columns').data('ls-path')
   $.getJSON list_files_path, (d) ->
-    $('#columns ul.column').empty();
+    $('#columns ul.column').data('ls-path', list_files_path).empty();
     open_path = list_files_path.replace(/^\/ls/, '/open').replace(/\/*$/, '')
     $.each d, (a,b) ->
       if b.name == "." or b.name == ".."
