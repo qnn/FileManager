@@ -189,6 +189,9 @@ a.file {
   font-size: 13px;
   cursor: default;
   padding: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   span.icon {
     float: left;
     display: block;

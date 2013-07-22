@@ -1,6 +1,16 @@
 class ManagerController < ApplicationController
 
   def index
+    path = params[:path] || '/'
+
+    #  /open/  redirects to root path
+    unless request.fullpath == '/'
+      if path == '/'
+        redirect_to root_path
+      end
+    end
+
+    @ls_path = File.join(list_files_path, path).chomp('/')
   end
 
   def ls

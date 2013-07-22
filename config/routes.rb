@@ -2,6 +2,9 @@ FileManager::Application.routes.draw do
 
   root to: 'manager#index'
 
+  get 'open' => 'manager#index', as: :open_files
+  get 'open/*path' => 'manager#index'
+
   get 'ls' => 'manager#ls', as: :list_files
   get 'ls/*path' => 'manager#ls'
 

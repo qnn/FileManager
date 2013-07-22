@@ -2,16 +2,20 @@ jQuery ($) ->
   list_files_path = $('#columns').data('ls-path')
   $.getJSON list_files_path, (d) ->
     $('#columns ul.column').empty();
+    open_path = list_files_path.replace(/^\/ls/, '/open').replace(/\/*$/, '')
     $.each d, (a,b) ->
       if b.name == "." or b.name == ".."
         return true
       type = if b['directory?'] then "dir" else "not_dir"
-      $('#columns ul.column').append('<li><a class="file '+type+'" href="#"><span class="icon"></span>'+b.name+'</a></li>')
+      $('#columns ul.column').append('<li><a class="file '+type+'" href="'+open_path+'/'+encodeURIComponent(b.name)+'"><span class="icon"></span>'+b.name+'</a></li>')
 
   $(document).on 'click', 'a.file', (e) ->
     e.preventDefault()
     $('a.file').removeClass('active')
     $(this).addClass('active')
+
+  $(document).on 'dblclick', 'a.file', (e) ->
+    location.href = $(this).attr('href')
 
   # resize columns
   resize_columns = ->
