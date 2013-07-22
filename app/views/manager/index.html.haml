@@ -9,10 +9,10 @@
       .vtable
         .top-placeholder
         #columns_container.vcenter
-          #columns{ data: { ls_path: @ls_path } }
+          #columns{ data: { list_files_path: list_files_path } }
             %ul.columns
               %li
-                %ul.column
+                %ul.column{ data: { ls_path: @ls_path } }
                   %li
         .bottom-placeholder
     .right-placeholder
