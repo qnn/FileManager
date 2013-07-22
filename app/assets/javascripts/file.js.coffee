@@ -12,6 +12,7 @@ file_js_onload = ->
       next_column = column_parent.next('li').find('ul.column[data-ls-path]')
       next_column_ls_path = null
       if next_column.length > 0
+        scroll_columns_to_right()
         load_file_list next_column
         next_column_ls_path = next_column.data('ls-path').replace(/^.*[\\\/]/, '')
 
@@ -40,6 +41,7 @@ file_js_onload = ->
     parent.nextAll('li').remove()
     li = $('<li />').insertAfter(after_element.parent())
     resize_columns()
+    scroll_columns_to_right()
     $('<ul />').addClass('column').data('ls-path', list_files_path() + path).appendTo(li)
 
   load_file_list($('#columns ul.column[data-ls-path]:first'))
@@ -54,6 +56,12 @@ file_js_onload = ->
 
   $(document).on 'dblclick', 'a.file', (e) ->
     location.href = $(this).attr('href')
+
+  # column list should stick to right
+  scroll_columns_to_right = ->
+    last = $('#columns ul.columns li:last')
+    if last.position().left + last.width() > $('#columns').width()
+      $('#columns ul.columns').scrollLeft($('#columns').width())
 
   # resize columns
   resize_columns = ->
