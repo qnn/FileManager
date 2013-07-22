@@ -1,4 +1,4 @@
-jQuery ($) ->
+file_js_onload = ->
   list_files_path = $('#columns').data('ls-path')
   $.getJSON list_files_path, (d) ->
     $('#columns ul.column').empty();
@@ -31,3 +31,6 @@ jQuery ($) ->
   resize_columns()
   $(window).resize ->
     resize_columns()
+
+$(file_js_onload)
+$(window).bind 'page:change', file_js_onload

@@ -3,11 +3,10 @@ class ManagerController < ApplicationController
   def index
     path = params[:path] || '/'
 
-    #  /open/  redirects to root path
+    # if not at root path
     unless request.fullpath == '/'
-      if path == '/'
-        redirect_to root_path
-      end
+      redirect_to root_path if path == '/'  #  /open/ redirects to root
+      redirect_to root_path unless Dir.exist?(get_path(path))  #  dir does not exist
     end
 
     @ls_path = File.join(list_files_path, path).chomp('/')
@@ -16,7 +15,7 @@ class ManagerController < ApplicationController
   def ls
     path = params[:path] || '/'
     begin
-      Dir.chdir(File.join(Dir.home, path))
+      Dir.chdir(get_path(path))
       files = []
       Dir.foreach('.') do |file|
         stat = File.stat(file)
@@ -31,5 +30,11 @@ class ManagerController < ApplicationController
       render nothing: true, status: 404
     end
   end
+
+  private
+
+    def get_path(path)
+      File.join(Dir.home, path)
+    end
 
 end
