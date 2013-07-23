@@ -63,7 +63,10 @@ file_js_onload = ->
   scroll_columns_to_right = ->
     last = $('#columns ul.columns li:last')
     if last.position().left + last.width() > $('#columns').width()
-      $('#columns ul.columns').scrollLeft($('#columns').width())
+      $('#columns ul.columns').slimScrollHorizontal({ 
+        width: 'auto',
+        scrollTo: $('#columns').width()
+      })
 
   # resize columns
   resize_columns = ->
@@ -77,6 +80,9 @@ file_js_onload = ->
     })
     $('#columns ul.columns > li').height(window.column_height)
     $('#columns ul.column').slimScroll({ height: 'auto' })
+    $('#columns ul.columns').slimScrollHorizontal({ 
+      width: 'auto'
+    })
   resize_columns()
   $(window).resize ->
     resize_columns()
