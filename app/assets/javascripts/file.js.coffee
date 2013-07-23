@@ -7,7 +7,7 @@ file_js_onload = ->
     path = column_element.data('ls-path')
     $.getJSON path, (d) ->
       # find next column
-      column_parent = column_element.parent()
+      column_parent = column_element.closest('li')
       column_height = column_parent.height()
       next_column = column_parent.next('li').find('ul.column[data-ls-path]')
       next_column_ls_path = null
@@ -16,7 +16,8 @@ file_js_onload = ->
         load_file_list next_column
         next_column_ls_path = next_column.data('ls-path').replace(/^.*[\\\/]/, '')
 
-      column_element.empty();
+      should_scroll_to = null
+      column_element.empty()
       path = '/' + path.replace(/^\/ls/, '') + '/'
       path = path.replace(/^\/*/, '/').replace(/\/*$/, '/')
       $.each d, (a,b) ->
@@ -34,12 +35,13 @@ file_js_onload = ->
         if b.name is next_column_ls_path
           anchor.addClass('active')
           if anchor.position().top > column_height - 20 # scroll to visible area
-            column_parent.animate({ scrollTop: anchor.position().top - column_height / 2 }, 1);
+              should_scroll_to = anchor.position().top - column_height / 2
+      column_element.slimScroll({ height: window.column_height, scrollTo: should_scroll_to })
 
   create_new_list = (path, after_element) ->
-    parent = after_element.parent()
+    parent = after_element.closest('li')
     parent.nextAll('li').remove()
-    li = $('<li />').insertAfter(after_element.parent())
+    li = $('<li />').insertAfter(parent)
     resize_columns()
     scroll_columns_to_right()
     $('<ul />').addClass('column').data('ls-path', list_files_path() + path).appendTo(li)
@@ -66,14 +68,15 @@ file_js_onload = ->
   # resize columns
   resize_columns = ->
     parent = $('#columns_container')
-    height = parent.height()
+    window.column_height = parent.height()
     $('#columns').css({
       top: parent.position().top,
       left: parent.position().left,
       width: parent.width(),
-      height: height
+      height: window.column_height
     })
-    $('.columns > li').height(height)
+    $('#columns ul.columns > li').height(window.column_height)
+    $('#columns ul.column').slimScroll({ height: 'auto' })
   resize_columns()
   $(window).resize ->
     resize_columns()
