@@ -89,7 +89,7 @@ body {
     table-layout: fixed;
     position: absolute;
     z-index: 20;
-    top: 38px;
+    top: 40px;
     width: 100%;
     .left-placeholder, .right-placeholder {
       width: 125px;
@@ -102,7 +102,7 @@ body {
       text-align: center;
       font-family: Lucida Grande;
       font-size: 13px;
-      text-shadow: 0 1px #DBDBDB;
+      text-shadow: 0 1px #F1F1F1;
     }
   }
   .foot {
@@ -110,7 +110,7 @@ body {
     table-layout: fixed;
     position: absolute;
     z-index: 20;
-    bottom: 83px;
+    bottom: 85px;
     width: 100%;
     .center {
       display: table-cell;

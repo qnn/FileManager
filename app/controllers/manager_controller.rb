@@ -15,7 +15,7 @@ class ManagerController < ApplicationController
           session_path.split(File::SEPARATOR).each do |_path|
             path = File.join(path, _path)
             break unless Dir.exist?(get_path(path))
-            @ls_paths << File.join(list_files_path, path).chomp('/')
+            @ls_paths << path.chomp('/')
           end
         end
       end
@@ -33,7 +33,7 @@ class ManagerController < ApplicationController
     end
 
     if @ls_paths.empty?
-      @ls_paths = [File.join(list_files_path, path).chomp('/')]
+      @ls_paths = [path.chomp('/')]
     end
   end
 
