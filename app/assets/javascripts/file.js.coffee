@@ -85,7 +85,11 @@ file_js_onload = ->
   load_file_list($('#columns ul.column[data-ls-path]:first'))
 
   make_file_list_uploadable = (element) ->
-    dropzone = new Dropzone(element[0], { url: "/upload" + element.data('ls-path') })
+    dropzone = new Dropzone(element[0], {
+      url: "/upload" + element.data('ls-path'),
+      clickable: false,
+      previewTemplate: '<li><a class="file not_dir" href="#"><span class="icon"></span><span class="dz-filename" data-dz-name></span><span class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></span><span class="dz-hidden dz-size" data-dz-size data-dz-errormessage></span><img data-dz-thumbnail class="dz-hidden" /></a></li>'
+    })
     dropzone.on "sending", (file, xhr, formData) ->
       xhr.setRequestHeader 'X-CSRF-Token', $('meta[name="csrf-token"]').attr('content')
     dropzone.on "success", ->

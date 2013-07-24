@@ -1,0 +1,27 @@
+.dz-drag-hover {
+  box-shadow: inset 0px 0px 0px 2px #B5D3FF;
+}
+.dz-progress {
+  display: inline-block;
+  width: 55px;
+  height: 10px;
+  background: #AFAFAF;
+  vertical-align: middle;
+  border-radius: 8px;
+}
+.dz-upload {
+  display: block;
+  height: 10px;
+  background: #6D6D6D;
+  border-radius: 8px;
+}
+.dz-filename {
+  display: inline-block;
+  width: 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dz-hidden {
+  display: none;
+}
