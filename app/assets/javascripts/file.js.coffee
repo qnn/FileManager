@@ -1,11 +1,26 @@
 file_js_onload = ->
 
+  pl = (quantity, word) ->
+    if quantity == 1
+      quantity + ' ' + word
+    else
+      quantity + ' ' + word + 's'
+
   update_current_path_and_title = (path) ->
     window.current_path = path
     if path == '' then path = '/'
     $('#title').text('FileManager - ' + path)
 
   update_current_path_and_title '/'
+
+  update_footer = (number_of_files, number_of_dirs) ->
+    if number_of_files > 0
+      text = pl(number_of_files, 'item')
+      if number_of_dirs > 0 and number_of_files != number_of_dirs
+        text += ' (' + pl(number_of_dirs, 'folder') + ')'
+    else
+      text = "Fail to open this folder."
+    $('#footer').text(text)
 
   list_files_path = (path = '') ->
     if path != null and path[0] != '/'
@@ -29,10 +44,16 @@ file_js_onload = ->
       column_element.empty()
       path += '/'
       path = path.replace(/^\/*/, '/').replace(/\/*$/, '/')
+      file_count = 0
+      dir_count = 0
       $.each d, (a,b) ->
         if b.name == "." or b.name == ".."
           return true
-        type = if b['directory?'] then "dir" else "not_dir"
+        if b['directory?']
+          type = "dir"
+          dir_count += 1
+        else
+          type = "not_dir"
         anchor = $('<a />', {
           class: 'file '+type,
           href: '/open'+path+encodeURIComponent(b.name),
@@ -40,12 +61,16 @@ file_js_onload = ->
         })
         anchor.data('path', path+b.name)
         column_element.append($('<li />').append(anchor))
+        file_count += 1
         # select
         if b.name is next_column_ls_path
           anchor.addClass('active')
           if anchor.position().top > column_height - 20 # scroll to visible area
               should_scroll_to = anchor.position().top - column_height / 2
       column_element.slimScroll({ height: window.column_height, scrollTo: should_scroll_to })
+      update_footer file_count, dir_count
+    .error -> # error getting ls json
+      update_footer -1
 
   create_new_list = (path, after_element) ->
     parent = after_element.closest('li')
@@ -68,6 +93,7 @@ file_js_onload = ->
       parent = column.closest('li')
       parent.nextAll('li').remove()
       update_current_path_and_title column.data('ls-path')
+      update_footer column.find('a.file').length, column.find('a.file.dir').length
 
   $(document).on 'dblclick', 'a.file', (e) ->
     location.href = $(this).attr('href')
