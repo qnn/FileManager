@@ -8,6 +8,9 @@ FileManager::Application.routes.draw do
   get 'ls' => 'manager#ls', as: :list_files
   get 'ls/*path' => 'manager#ls', format: false
 
+  post 'upload' => 'manager#upload', as: :upload_files
+  post 'upload/*path' => 'manager#upload', format: false
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

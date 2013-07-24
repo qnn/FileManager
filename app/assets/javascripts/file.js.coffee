@@ -14,7 +14,7 @@ file_js_onload = ->
   update_current_path_and_title '/'
 
   update_footer = (number_of_files, number_of_dirs) ->
-    if number_of_files > 0
+    if number_of_files >= 0
       text = pl(number_of_files, 'item')
       if number_of_dirs > 0 and number_of_files != number_of_dirs
         text += ' (' + pl(number_of_dirs, 'folder') + ')'
@@ -78,9 +78,24 @@ file_js_onload = ->
     li = $('<li />').insertAfter(parent)
     resize_columns()
     scroll_columns_to_right()
-    $('<ul />').addClass('column').data('ls-path', path).appendTo(li)
+    element = $('<ul />').addClass('column').data('ls-path', path).appendTo(li)
+    make_file_list_uploadable element
+    # should return newly created element
 
   load_file_list($('#columns ul.column[data-ls-path]:first'))
+
+  make_file_list_uploadable = (element) ->
+    dropzone = new Dropzone(element[0], { url: "/upload" + element.data('ls-path') })
+    dropzone.on "sending", (file, xhr, formData) ->
+      xhr.setRequestHeader 'X-CSRF-Token', $('meta[name="csrf-token"]').attr('content')
+    dropzone.on "success", ->
+      parent = element.closest('li')
+      parent.nextAll('li').remove()
+      load_file_list element
+    element
+
+  $('#columns ul.column').each ->
+    make_file_list_uploadable $(this)
 
   $(document).on 'click', 'a.file', (e) ->
     column = $(this).closest('ul.column')

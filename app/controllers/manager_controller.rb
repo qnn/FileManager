@@ -60,6 +60,15 @@ class ManagerController < ApplicationController
     end
   end
 
+  def upload
+    path = params[:path] || '/'
+    upload_file = params[:file]
+    File.open(File.join(get_path(path), upload_file.original_filename), 'wb') do |file|
+      file.write(upload_file.read)
+    end
+    render json: {file: File.join(get_path(path), upload_file.original_filename)}
+  end
+
   private
 
     def get_path(path)
