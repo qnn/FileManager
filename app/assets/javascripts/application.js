@@ -15,5 +15,4 @@
 //= require jquery.slimscroll
 //= require jquery.slimscroll.horizontal
 //= require jquery-ui-1.10.3.custom.min
-//= require turbolinks
 //= require_tree .

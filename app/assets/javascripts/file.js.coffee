@@ -96,7 +96,7 @@ file_js_onload = ->
       update_footer column.find('a.file').length, column.find('a.file.dir').length
 
   $(document).on 'dblclick', 'a.file', (e) ->
-    location.href = $(this).attr('href')
+    window.location.href = $(this).attr('href')
 
   # column list should stick to right
   scroll_columns_to_right = ->
@@ -121,4 +121,3 @@ file_js_onload = ->
     resize_columns()
 
 $(file_js_onload)
-$(window).bind 'page:change', file_js_onload
