@@ -117,6 +117,19 @@ file_js_onload = ->
   $(document).on 'dblclick', 'a.file', (e) ->
     window.location.href = $(this).attr('href')
 
+  $(document).on 'contextmenu', 'a.file', (e) ->
+    e.preventDefault()
+    column = $(this).closest('ul.column')
+    column.find('a.file').removeClass('active')
+    $(this).addClass('active')
+    $('#context_menu').css({ top: e.pageY - 10, left: e.pageX - 17 }).show()
+
+  $(document).bind 'contextmenu', (e) ->
+    e.preventDefault()
+
+  $(document).bind 'click', (e) ->
+    $('#context_menu').hide()
+
   # column list should stick to right
   scroll_columns_to_right = ->
     $('#columns ul.columns').slimScrollHorizontal({ width: 'auto', scrollTo: 99999 })
