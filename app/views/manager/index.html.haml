@@ -1,35 +1,46 @@
 #finder
-  .title
-    .left-placeholder
-    #title.center FileManager
-    .right-placeholder
-  .content
-    .left-placeholder
-    .center
-      .vtable
-        .top-placeholder
-        #columns_container.vcenter
+  .finder
+    .r1
+      .top
+        .left
+        .center
+          .title_container
+            #title FileManager
+        .right
+    .r2
+      .middle
+        .left
+        #columns_container.center
           #columns{ data: { list_files_path: list_files_path } }
             %ul.columns
               - @ls_paths.each do |ls_path|
                 %li
                   %ul.column{ data: { ls_path: ls_path } }
                     %li
-        .bottom-placeholder
-    .right-placeholder
-  .foot
-    .left-placeholder
-    #footer.center No files and folders in current directory.
-    .right-placeholder
+        .right
+    .r3
+      .bottom
+        .left
+        .center
+          .footer_container
+            #footer No files and folders in current directory.
+        .right
   .framework
-    .corner.top-left
-    .corner.top-right
-    .corner.bottom-left
-    .corner.bottom-right
-    .repeat-x-top
-    .repeat-x-bottom
-    .repeat-y-left
-    .repeat-y-right
+    .r1
+      .top
+        .left
+        .center
+        .right
+    .r2
+      .middle
+        .left
+        .center
+        .right
+    .r3
+      .bottom
+        .left
+        .center
+        .right
 #context_menu
   .menu
     .left

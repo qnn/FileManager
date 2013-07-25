@@ -122,13 +122,13 @@ file_js_onload = ->
     column = $(this).closest('ul.column')
     column.find('a.file').removeClass('active')
     $(this).addClass('active')
-    $('#context_menu').css({ top: e.pageY - 10, left: e.pageX - 17, 'z-index': 20 })
+    $('#context_menu').css({ top: e.pageY - 10, left: e.pageX - 17, 'z-index': 20 }).show()
 
   $(document).bind 'contextmenu', (e) ->
     e.preventDefault()
 
   $(document).bind 'click', (e) ->
-    $('#context_menu').css({ 'z-index': 0 })
+    $('#context_menu').css({ 'z-index': 0 }).hide()
 
   # column list should stick to right
   scroll_columns_to_right = ->
