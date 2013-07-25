@@ -55,7 +55,7 @@ class ManagerController < ApplicationController
       end
       files = files.select{ |file| file[:directory?] } + files.select{ |file| !file[:directory?] }
       render json: files
-    rescue Errno::ENOENT
+    rescue Errno::ENOENT, Errno::ENOTDIR
       render nothing: true, status: 404
     end
   end
@@ -69,10 +69,45 @@ class ManagerController < ApplicationController
     render json: {file: File.join(get_path(path), upload_file.original_filename)}
   end
 
+  def rm
+    path = params[:path] || '/'
+    dest = trash_file(path)
+    if dest
+      render nothing: true, status: 200
+    else
+      render nothing: true, status: 500
+    end
+  end
+
   private
 
     def get_path(path)
       File.join(Dir.home, path)
+    end
+
+    def trash_file(path)
+      trash_path = get_path('.Trash')
+
+      # create directory if it does not exist
+      unless File.directory?(trash_path)
+        begin
+          Dir.mkdir trash_path, 0700
+        rescue SystemCallError
+          return false
+        end
+      end
+
+      source = get_path(path)
+      dest = File.join(trash_path, File.basename(path))
+
+      require 'fileutils'
+      begin
+        FileUtils.mv source, dest
+      rescue
+        return false
+      end
+
+      true
     end
 
 end

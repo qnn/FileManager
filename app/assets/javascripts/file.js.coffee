@@ -13,13 +13,18 @@ file_js_onload = ->
 
   update_current_path_and_title '/'
 
+  window.error_msgs = [
+    "Fail to open this folder.",
+    "Fail to move this file to trash.",
+  ]
+
   update_footer = (number_of_files, number_of_dirs) ->
     if number_of_files >= 0
       text = pl(number_of_files, 'item')
       if number_of_dirs > 0 and number_of_files != number_of_dirs
         text += ' (' + pl(number_of_dirs, 'folder') + ')'
     else
-      text = "Fail to open this folder."
+      text = window.error_msgs[Math.abs(number_of_files)-1]
     $('#footer').text(text)
 
   list_files_path = (path = '') ->
@@ -131,6 +136,12 @@ file_js_onload = ->
     column = $(this).closest('ul.column')
     column.find('a.file').removeClass('active')
     $(this).addClass('active')
+    open_context_menu $(this), e
+
+  window.selected_items = []
+
+  open_context_menu = (file, e) ->
+    window.selected_items = [file]
     $('#context_menu').css({ top: e.pageY - 10, left: e.pageX - 17, 'z-index': 20 }).show()
 
   hide_context_menu = ->
@@ -140,6 +151,17 @@ file_js_onload = ->
     if $('#context_menu').css('z-index') != '0'
       hide_context_menu()
       e.preventDefault()
+
+  $(document).on 'click', '#menu_delete', (e) ->
+    e.preventDefault()
+    if window.selected_items.length == 1
+      item = window.selected_items[0]
+      $.post(window.routes.remove_files_path.replace('/:path', item.data('path')), {
+        _method: 'delete'
+      }).success ->
+        load_file_list item.closest('ul.column')
+      .error ->
+        update_footer -2
 
   $(document).bind 'click', (e) ->
     hide_context_menu()

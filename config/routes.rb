@@ -11,6 +11,8 @@ FileManager::Application.routes.draw do
   post 'upload' => 'manager#upload', as: :upload_files
   post 'upload/*path' => 'manager#upload', format: false
 
+  delete 'rm/*path' => 'manager#rm', as: :remove_files, format: false
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

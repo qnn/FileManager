@@ -48,7 +48,7 @@
       %li.bottom-separator
         %a{ id: 'menu_download', href: '#' } Open
       %li.bottom-separator
-        %a{ id: 'menu_delete', href: "#" } Delete
+        %a{ id: 'menu_delete', href: "#" } Move to Trash
       %li
         %a{ id: 'menu_get_info', href: "#" } Get Info
       %li
@@ -70,3 +70,7 @@
         .left
         .center
         .right
+:javascript
+  window.routes = {
+    remove_files_path: '#{remove_files_path(':path')}'
+  };
