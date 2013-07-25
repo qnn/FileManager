@@ -95,15 +95,23 @@ file_js_onload = ->
     dropzone.on "success", ->
       parent = element.closest('li')
       parent.nextAll('li').remove()
-      load_file_list element
-    element
+      # remove dropzone tags to make it look like real one
+      success = element.find('.dz-processing.dz-success')
+      success.find('.dz-filename').replaceWith ->
+        $(this).contents()
+      success.find('.dz-hidden, .dz-progress').remove();
+      success.removeClass('dz-processing dz-success')
+      # if all operations completed, refresh the list
+      if element.find('.dz-processing').length == 0
+        load_file_list element
+    element # return the element
 
   $('#columns ul.column').each ->
     make_file_list_uploadable $(this)
 
   $(document).on 'click', 'a.file', (e) ->
-    column = $(this).closest('ul.column')
     e.preventDefault()
+    column = $(this).closest('ul.column')
     column.find('a.file').removeClass('active')
     $(this).addClass('active')
     if $(this).hasClass('dir')
@@ -119,16 +127,22 @@ file_js_onload = ->
 
   $(document).on 'contextmenu', 'a.file', (e) ->
     e.preventDefault()
+    e.stopPropagation()
     column = $(this).closest('ul.column')
     column.find('a.file').removeClass('active')
     $(this).addClass('active')
     $('#context_menu').css({ top: e.pageY - 10, left: e.pageX - 17, 'z-index': 20 }).show()
 
+  hide_context_menu = ->
+    $('#context_menu').css({ 'z-index': 0 }).hide()
+
   $(document).bind 'contextmenu', (e) ->
-    e.preventDefault()
+    if $('#context_menu').css('z-index') != '0'
+      hide_context_menu()
+      e.preventDefault()
 
   $(document).bind 'click', (e) ->
-    $('#context_menu').css({ 'z-index': 0 }).hide()
+    hide_context_menu()
 
   # column list should stick to right
   scroll_columns_to_right = ->
