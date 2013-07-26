@@ -116,6 +116,8 @@ file_js_onload = ->
 
   $(document).on 'click', 'a.file', (e) ->
     e.preventDefault()
+    e.stopPropagation()
+    hide_context_menu()
     column = $(this).closest('ul.column')
     column.find('a.file').removeClass('active')
     $(this).addClass('active')
@@ -133,27 +135,47 @@ file_js_onload = ->
   $(document).on 'contextmenu', 'a.file', (e) ->
     e.preventDefault()
     e.stopPropagation()
-    column = $(this).closest('ul.column')
-    column.find('a.file').removeClass('active')
-    $(this).addClass('active')
-    open_context_menu $(this), e
+    $(this).trigger('click')
+    open_context_menu 'for_files', $(this), e
+
+  $(document).on 'click', 'ul.columns > li', (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+    hide_context_menu()
+    $(this).find('a.file').removeClass('active')
+    $(this).nextAll('li').remove()
+
+  $(document).on 'contextmenu', 'ul.columns > li', (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+    $(this).find('a.file').removeClass('active')
+    $(this).nextAll('li').remove()
+    open_context_menu 'for_lists', null, e
 
   window.selected_items = []
 
-  open_context_menu = (file, e) ->
+  open_context_menu = (type, file, e) ->
     window.selected_items = [file]
-    $('#context_menu').css({ top: e.pageY - 10, left: e.pageX - 17, 'z-index': 20 }).show()
+    $('#menu').data('type', type).empty()
+    $.each menu_items[type], (a,b) ->
+      li = $('<li />')
+      if b.substr(-2) == '--'
+        b = b.substr(0, b.length-2)
+        li.addClass('bottom-separator')
+      li.append('<a href="#">'+b+'</a>')
+      $('#menu').append(li)
+    $('#context_menu').show().css({
+      height: $('#menu').outerHeight() + 20,
+      top: e.pageY - 10,
+      left: e.pageX - 17,
+      'z-index': 20
+    })
 
   hide_context_menu = ->
     $('#context_menu').css({ 'z-index': 0 }).hide()
 
-  $(document).bind 'contextmenu', (e) ->
-    if $('#context_menu').css('z-index') != '0'
-      hide_context_menu()
-      e.preventDefault()
-
-  $(document).on 'click', '#menu_delete', (e) ->
-    e.preventDefault()
+  # move to trash
+  move_to_trash = ->
     if window.selected_items.length == 1
       item = window.selected_items[0]
       $.post(window.routes.remove_files_path.replace('/:path', item.data('path')), {
@@ -162,6 +184,28 @@ file_js_onload = ->
         load_file_list item.closest('ul.column')
       .error ->
         update_footer -2
+
+  menu_items =
+    for_files: ['Open--','Move to Trash--','Get Info','Rename'],
+    for_lists: ['Undo--','Refresh--','Get Info','Settings'],
+
+  menu_items_actions =
+    for_files: [null, move_to_trash, null, null],
+    for_lists: [null, null, null, null],
+
+  $(document).bind 'contextmenu', (e) ->
+    if $('#context_menu').css('z-index') != '0'
+      hide_context_menu()
+      e.preventDefault()
+
+  $(document).on 'click', '#menu a', (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+    index = $(this).parent().index()
+    func = menu_items_actions[$('#menu').data('type')][index]
+    if func != null
+      func();
+    hide_context_menu()
 
   $(document).bind 'click', (e) ->
     hide_context_menu()

@@ -1,13 +1,12 @@
 #context_menu {
   width: 250px;
-  height: 155px;
+  height: 50px;
   position: absolute;
   z-index: 0;
   top: 40px;
   left: 48px;
   .menu {
     width: 100%;
-    height: 100%;
     position: absolute;
     z-index: 100;
     display: table;
