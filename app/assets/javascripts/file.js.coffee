@@ -184,7 +184,7 @@ file_js_onload = ->
       $.post(window.routes.remove_files_path.replace('/:path', item.data('path')), {
         _method: 'delete'
       }).success (d) ->
-        window.available_undos = [d]
+        window.available_undos.unshift d
         load_file_list item.closest('ul.column')
       .error ->
         update_footer -2
@@ -195,11 +195,17 @@ file_js_onload = ->
     if window.available_undos.length > 0
       undo = window.available_undos[0].undo
       $.post(undo.action, undo.parameters)
-      .success ->
+      .complete ->
         window.available_undos = window.available_undos.splice(1)
+      .success ->
         load_file_list window.selected_items[0].find('ul.column')
       .error ->
         update_footer -3
+
+  # refresh list
+  refresh = ->
+    if window.selected_items.length > 0
+      load_file_list window.selected_items[0].find('ul.column')
 
   menu_items =
     for_files: ['Open--','Move to Trash--','Get Info','Rename'],
@@ -217,7 +223,7 @@ file_js_onload = ->
 
   menu_items_clicked =
     for_files: [null, move_to_trash, null, null],
-    for_lists: [undo, null, null, null],
+    for_lists: [undo, refresh, null, null],
 
   $(document).bind 'contextmenu', (e) ->
     if $('#context_menu').css('z-index') != '0'
