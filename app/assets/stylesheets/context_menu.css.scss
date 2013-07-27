@@ -32,7 +32,7 @@
           height: 19px;
           color: #000;
           font-family: Lucida Grande;
-          font-size: 15px;
+          font-size: 14px;
           text-decoration: none;
           overflow: hidden;
           white-space: nowrap;
@@ -52,6 +52,12 @@
             text-decoration: none;
             background-position: 0 0;
           }
+        }
+      }
+      li.disabled {
+        a {
+          color: #ddd;
+          background: none;
         }
       }
     }

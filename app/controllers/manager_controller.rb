@@ -72,7 +72,26 @@ class ManagerController < ApplicationController
   def rm
     path = params[:path] || '/'
     dest = trash_file(path)
-    if dest
+    if dest != false
+      render json: {
+        undo: {
+          name: "Move of #{File.basename(path)}",
+          action: "#{move_files_path(dest)}",
+          parameters: {
+            _method: 'put',
+            to: path
+          }
+        }
+      }
+    else
+      render nothing: true, status: 500
+    end
+  end
+
+  def mv
+    from = params[:path]
+    to = params[:to]
+    if move_file(from, to)
       render nothing: true, status: 200
     else
       render nothing: true, status: 500
@@ -107,7 +126,25 @@ class ManagerController < ApplicationController
         return false
       end
 
-      true
+      dest.sub(get_path(''), '')
     end
 
+    def move_file(from, to)
+      return false if from.nil? or to.nil?
+
+      from = get_path(from)
+      to = get_path(to)
+      unless File.exists?(from)
+        return false
+      end
+
+      require 'fileutils'
+      begin
+        FileUtils.mv from, to
+      rescue
+        return false
+      end
+      
+      true
+    end
 end

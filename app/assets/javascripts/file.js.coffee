@@ -16,6 +16,7 @@ file_js_onload = ->
   window.error_msgs = [
     "Fail to open this folder.",
     "Fail to move this file to trash.",
+    "Fail to complete the undo request.",
   ]
 
   update_footer = (number_of_files, number_of_dirs) ->
@@ -150,7 +151,7 @@ file_js_onload = ->
     e.stopPropagation()
     $(this).find('a.file').removeClass('active')
     $(this).nextAll('li').remove()
-    open_context_menu 'for_lists', null, e
+    open_context_menu 'for_lists', $(this), e
 
   window.selected_items = []
 
@@ -170,6 +171,7 @@ file_js_onload = ->
       left: e.pageX - 17,
       'z-index': 20
     })
+    menu_items_before_clicked[type]()
 
   hide_context_menu = ->
     $('#context_menu').css({ 'z-index': 0 }).hide()
@@ -178,20 +180,44 @@ file_js_onload = ->
   move_to_trash = ->
     if window.selected_items.length == 1
       item = window.selected_items[0]
+      return if not item.is('a.file')
       $.post(window.routes.remove_files_path.replace('/:path', item.data('path')), {
         _method: 'delete'
-      }).success ->
+      }).success (d) ->
+        window.available_undos = [d]
         load_file_list item.closest('ul.column')
       .error ->
         update_footer -2
+
+  window.available_undos = []
+  # undo
+  undo = ->
+    if window.available_undos.length > 0
+      undo = window.available_undos[0].undo
+      $.post(undo.action, undo.parameters)
+      .success ->
+        window.available_undos = window.available_undos.splice(1)
+        load_file_list window.selected_items[0].find('ul.column')
+      .error ->
+        update_footer -3
 
   menu_items =
     for_files: ['Open--','Move to Trash--','Get Info','Rename'],
     for_lists: ['Undo--','Refresh--','Get Info','Settings'],
 
-  menu_items_actions =
+  menu_items_before_clicked =
+    for_files: ->
+      null
+    for_lists: ->
+      if window.available_undos.length == 0
+        $('#menu li:first').addClass('disabled')
+      else
+        text = 'Undo "' + window.available_undos[0].undo.name + '"'
+        $('#menu li:first').removeClass('disabled').find('a').text(text).attr('title', text)
+
+  menu_items_clicked =
     for_files: [null, move_to_trash, null, null],
-    for_lists: [null, null, null, null],
+    for_lists: [undo, null, null, null],
 
   $(document).bind 'contextmenu', (e) ->
     if $('#context_menu').css('z-index') != '0'
@@ -202,7 +228,7 @@ file_js_onload = ->
     e.preventDefault()
     e.stopPropagation()
     index = $(this).parent().index()
-    func = menu_items_actions[$('#menu').data('type')][index]
+    func = menu_items_clicked[$('#menu').data('type')][index]
     if func != null
       func();
     hide_context_menu()
