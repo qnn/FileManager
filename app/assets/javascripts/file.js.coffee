@@ -85,10 +85,25 @@ file_js_onload = ->
     resize_columns()
     scroll_columns_to_right()
     element = $('<ul />').addClass('column').data('ls-path', path).appendTo(li)
+    make_file_list_selectable element
     make_file_list_uploadable element
     # should return newly created element
 
   load_file_list($('#columns ul.column[data-ls-path]:first'))
+
+  make_file_list_selectable = (element) ->
+    $(element).click (e) ->
+      e.preventDefault()
+      e.stopPropagation()
+      hide_context_menu()
+      $(this).nextAll('li').remove()
+    .selectable({
+      filter: 'li'
+      , selecting: (event, ui) ->
+        $(ui.selecting).find('a.file').addClass('active')
+      , unselecting: (event, ui) ->
+        $(ui.unselecting).find('a.file').removeClass('active')
+    })
 
   make_file_list_uploadable = (element) ->
     dropzone = new Dropzone(element[0], {
@@ -113,6 +128,7 @@ file_js_onload = ->
     element # return the element
 
   $('#columns ul.column').each ->
+    make_file_list_selectable $(this)
     make_file_list_uploadable $(this)
 
   $(document).on 'click', 'a.file', (e) ->
@@ -136,15 +152,14 @@ file_js_onload = ->
   $(document).on 'contextmenu', 'a.file', (e) ->
     e.preventDefault()
     e.stopPropagation()
-    $(this).trigger('click')
+    if !$(this).hasClass('active')
+      column = $(this).closest('ul.column')
+      column.find('a.file').removeClass('active')
+      $(this).addClass('active')
     open_context_menu 'for_files', $(this), e
 
-  $(document).on 'click', 'ul.columns > li', (e) ->
-    e.preventDefault()
-    e.stopPropagation()
-    hide_context_menu()
-    $(this).find('a.file').removeClass('active')
-    $(this).nextAll('li').remove()
+  # $(document).on 'click', 'ul.columns > li', (e) ->
+  #   (code move to make_file_list_selectable)
 
   $(document).on 'contextmenu', 'ul.columns > li', (e) ->
     e.preventDefault()
