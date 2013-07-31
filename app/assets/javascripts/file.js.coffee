@@ -103,6 +103,25 @@ file_js_onload = ->
         $(ui.selecting).find('a.file').addClass('active')
       , unselecting: (event, ui) ->
         $(ui.unselecting).find('a.file').removeClass('active')
+      , start: (event, ui) ->
+        hide_context_menu()
+        # pressing command or ctrl key to select multiple items
+        if event.metaKey == false and event.ctrlKey == false
+          $(this).find('a.file').removeClass('active')
+      , stop: (event, ui) ->
+        column = $(this)
+        selected = column.find('.ui-selectee.ui-selected')
+        # clicking on one item
+        if selected.length == 1
+          selected = selected.find('a.file')
+          selected.addClass('active')
+          if selected.hasClass('dir')
+            load_file_list create_new_list(selected.data('path'), column)
+          else
+            parent = column.closest('li')
+            parent.nextAll('li').remove()
+            update_current_path_and_title column.data('ls-path')
+            update_footer column.find('a.file').length, column.find('a.file.dir').length
     })
 
   make_file_list_uploadable = (element) ->
@@ -131,20 +150,8 @@ file_js_onload = ->
     make_file_list_selectable $(this)
     make_file_list_uploadable $(this)
 
-  $(document).on 'click', 'a.file', (e) ->
-    e.preventDefault()
-    e.stopPropagation()
-    hide_context_menu()
-    column = $(this).closest('ul.column')
-    column.find('a.file').removeClass('active')
-    $(this).addClass('active')
-    if $(this).hasClass('dir')
-      load_file_list create_new_list($(this).data('path'), column)
-    else
-      parent = column.closest('li')
-      parent.nextAll('li').remove()
-      update_current_path_and_title column.data('ls-path')
-      update_footer column.find('a.file').length, column.find('a.file.dir').length
+  # $(document).on 'click', 'a.file', (e) ->
+  #   (code move to make_file_list_selectable)
 
   $(document).on 'dblclick', 'a.file', (e) ->
     window.location.href = $(this).attr('href')
