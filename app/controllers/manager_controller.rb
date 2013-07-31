@@ -69,33 +69,56 @@ class ManagerController < ApplicationController
     render json: {file: File.join(get_path(path), upload_file.original_filename)}
   end
 
+  # move one or more files in a directory to trash
   def rm
     path = params[:path] || '/'
-    dest = trash_file(path)
-    if dest != false
-      render json: {
-        undo: {
+
+    if params.has_key?(:files) and params[:files].kind_of?(Array)
+      files = params[:files]
+      dests = []
+      files.each do |file|
+        dest = trash_file(File.join(path, file))
+        break if dest == false
+        dests << dest
+      end
+      render nothing: true, status: 500 and return if dests.empty?
+
+      parent = File.dirname(dests[0])
+      dests.map! do |dest|
+        File.basename(dest)
+      end
+      render json: { undo: {
+        name: "Move of #{dests.length} files",
+        action: "#{move_files_path(parent)}",
+        parameters: { _method: 'put', to: path, files: dests }
+      }}
+    else # if to move one file to trash
+      dest = trash_file(path)
+
+      render nothing: true, status: 500 and return if dest == false
+
+      render json: { undo: {
           name: "Move of #{File.basename(path)}",
           action: "#{move_files_path(dest)}",
-          parameters: {
-            _method: 'put',
-            to: path
-          }
-        }
-      }
-    else
-      render nothing: true, status: 500
+          parameters: { _method: 'put', to: path }
+      }}
     end
   end
 
   def mv
     from = params[:path]
     to = params[:to]
-    if move_file(from, to)
-      render nothing: true, status: 200
+    if params.has_key?(:files)
+      files = params[:files]
+      files.each do |file|
+        if move_file(File.join(from, file), File.join(to, file)) == false
+          render nothing: true, status: 500 and return
+        end
+      end
     else
-      render nothing: true, status: 500
+      render nothing: true, status: 500 and return if move_file(from, to) == false
     end
+    render nothing: true, status: 200
   end
 
   private

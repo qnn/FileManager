@@ -159,11 +159,11 @@ file_js_onload = ->
   $(document).on 'contextmenu', 'a.file', (e) ->
     e.preventDefault()
     e.stopPropagation()
+    files = $(this).closest('ul.column').find('a.file')
     if !$(this).hasClass('active')
-      column = $(this).closest('ul.column')
-      column.find('a.file').removeClass('active')
+      files.removeClass('active')
       $(this).addClass('active')
-    open_context_menu 'for_files', $(this), e
+    open_context_menu 'for_files', files.filter('.active'), e
 
   # $(document).on 'click', 'ul.columns > li', (e) ->
   #   (code move to make_file_list_selectable)
@@ -178,7 +178,7 @@ file_js_onload = ->
   window.selected_items = []
 
   open_context_menu = (type, file, e) ->
-    window.selected_items = [file]
+    window.selected_items = file
     $('#menu').data('type', type).empty()
     $.each menu_items[type], (a,b) ->
       li = $('<li />')
@@ -198,16 +198,25 @@ file_js_onload = ->
   hide_context_menu = ->
     $('#context_menu').css({ 'z-index': 0 }).hide()
 
-  # move to trash
+  # move one or more files in a directory to trash
   move_to_trash = ->
-    if window.selected_items.length == 1
-      item = window.selected_items[0]
-      return if not item.is('a.file')
-      $.post(window.routes.remove_files_path.replace('/:path', item.data('path')), {
+    first = window.selected_items.eq(0)
+    path = first.closest('ul.column').data('ls-path')
+    files = []
+    window.selected_items.each ->
+      if $(this).is('a.file')
+        files.push $(this).data('path').substr(path.length + 1)
+    if files.length > 0
+      if files.length == 1
+        path = first.data('path')
+        files = null
+      else
+        files = { files: files }
+      $.post(window.routes.remove_files_path.replace('/:path', path), $.extend({
         _method: 'delete'
-      }).success (d) ->
+      }, files)).success (d) ->
         window.available_undos.unshift d
-        load_file_list item.closest('ul.column')
+        load_file_list first.closest('ul.column')
       .error ->
         update_footer -2
 
@@ -220,14 +229,14 @@ file_js_onload = ->
       .complete ->
         window.available_undos = window.available_undos.splice(1)
       .success ->
-        load_file_list window.selected_items[0].find('ul.column')
+        load_file_list window.selected_items.eq(0).find('ul.column')
       .error ->
         update_footer -3
 
   # refresh list
   refresh = ->
     if window.selected_items.length > 0
-      load_file_list window.selected_items[0].find('ul.column')
+      load_file_list window.selected_items.eq(0).find('ul.column')
 
   menu_items =
     for_files: ['Open--','Move to Trash--','Get Info','Rename'],
