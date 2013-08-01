@@ -123,6 +123,10 @@ file_js_onload = ->
             parent.nextAll('li').remove()
             update_current_path_and_title column.data('ls-path')
             update_footer column.find('a.file').length, column.find('a.file.dir').length
+          if window.last_clicked_list_item && selected[0] == window.last_clicked_list_item.selected[0] && event.timeStamp - window.last_clicked_list_item.timeStamp <= 3000
+            show_renames()
+          else
+            window.last_clicked_list_item = { selected: selected, timeStamp: event.timeStamp }
     })
 
   make_file_list_uploadable = (element) ->
@@ -173,6 +177,10 @@ file_js_onload = ->
       val = input.val().trim()
       path = input.closest('a.file').data('path')
 
+      if val == input.data('name') or val == ''
+        cancel_renames()
+        return
+
       already_exists = false
       input.closest('ul.column').find('a.file').each ->
         if $('.name', this).text() == val
@@ -194,19 +202,28 @@ file_js_onload = ->
     $('input.rename').replaceWith ->
       $(this).data('name')
 
+  # show rename input box
+  show_renames = ->
+    last_selected = $('#columns a.file.active:last')
+    if last_selected.length == 1
+      if last_selected.find('input.rename').length == 0
+        input = $('<input />')
+        input.bind 'click', (e) ->
+          e.preventDefault()
+          e.stopPropagation()
+        .bind 'contextmenu dblclick mousedown', (e) ->
+          e.stopPropagation()
+        input.data('name', last_selected.find('span.name').text())
+        last_selected.find('span.name').html(input)
+        input.addClass('rename')
+        input.val(input.data('name')).select()
+      else
+        save_renames()
+
   # detect pressing enter
   $(document).keyup (e) ->
     if e.which == 13 # enter key
-      last_selected = $('#columns a.file.active:last')
-      if last_selected.length == 1
-        if last_selected.find('input.rename').length == 0
-          input = $('<input />')
-          input.data('name', last_selected.find('span.name').text())
-          last_selected.find('span.name').html(input)
-          input.addClass('rename')
-          input.val(input.data('name')).select()
-        else
-          save_renames()
+      show_renames()
     else if e.which == 27 # esc key
       cancel_renames()
 
@@ -223,6 +240,7 @@ file_js_onload = ->
   window.selected_items = []
 
   open_context_menu = (type, file, e) ->
+    save_renames()
     window.selected_items = file
     $('#menu').data('type', type).empty()
     $.each menu_items[type], (a,b) ->
@@ -241,6 +259,7 @@ file_js_onload = ->
     menu_items_before_clicked[type]()
 
   hide_context_menu = ->
+    save_renames()
     $('#context_menu').css({ 'z-index': 0 }).hide()
 
   # move one or more files in a directory to trash

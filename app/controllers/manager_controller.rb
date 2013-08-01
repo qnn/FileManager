@@ -168,6 +168,7 @@ class ManagerController < ApplicationController
 
     def move_file(from, to)
       return false if from.nil? or to.nil?
+      return false if from == to
 
       from = get_path(from)
       to = get_path(to)
