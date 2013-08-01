@@ -13,6 +13,8 @@ FileManager::Application.routes.draw do
 
   put 'mv/*path' => 'manager#mv', as: :move_files, format: false
 
+  put 'rename/*path' => 'manager#rename', as: :rename_files, format: false
+
   delete 'rm/*path' => 'manager#rm', as: :remove_files, format: false
 
   # The priority is based upon order of creation: first created -> highest priority.

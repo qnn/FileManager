@@ -14,9 +14,10 @@ file_js_onload = ->
   update_current_path_and_title '/'
 
   window.error_msgs = [
-    "Fail to open this folder.",
-    "Fail to move this file to trash.",
-    "Fail to complete the undo request.",
+    "Fail to open this folder.",                # -1
+    "Fail to move this file to trash.",         # -2
+    "Fail to complete the undo request.",       # -3
+    "Fail to rename this file.",                # -4
   ]
 
   update_footer = (number_of_files, number_of_dirs) ->
@@ -63,7 +64,7 @@ file_js_onload = ->
         anchor = $('<a />', {
           class: 'file '+type,
           href: '/open'+path+encodeURIComponent(b.name),
-          html: '<span class="icon"></span>'+b.name
+          html: '<span class="icon"></span><span class="name">'+b.name+'</span>'
         })
         anchor.data('path', path+b.name)
         column_element.append($('<li />').append(anchor))
@@ -165,6 +166,50 @@ file_js_onload = ->
       $(this).addClass('active')
     open_context_menu 'for_files', files.filter('.active'), e
 
+  # saving renames
+  save_renames = ->
+    $('input.rename').each ->
+      input = $(this)
+      val = input.val().trim()
+      path = input.closest('a.file').data('path')
+
+      already_exists = false
+      input.closest('ul.column').find('a.file').each ->
+        if $('.name', this).text() == val
+          already_exists = true
+      if already_exists and not confirm('The file name "'+val+'" is already taken. Are you sure you want to overwrite the file?')
+        return
+
+      $.post(window.routes.rename_files_path.replace('/:path', path), {
+        _method: 'put',
+        to: val
+      }).success (d) ->
+        window.available_undos.unshift d
+        load_file_list input.closest('ul.column')
+      .error ->
+        update_footer -4
+
+  # clearing rename inputs
+  cancel_renames = ->
+    $('input.rename').replaceWith ->
+      $(this).data('name')
+
+  # detect pressing enter
+  $(document).keyup (e) ->
+    if e.which == 13 # enter key
+      last_selected = $('#columns a.file.active:last')
+      if last_selected.length == 1
+        if last_selected.find('input.rename').length == 0
+          input = $('<input />')
+          input.data('name', last_selected.find('span.name').text())
+          last_selected.find('span.name').html(input)
+          input.addClass('rename')
+          input.val(input.data('name')).select()
+        else
+          save_renames()
+    else if e.which == 27 # esc key
+      cancel_renames()
+
   # $(document).on 'click', 'ul.columns > li', (e) ->
   #   (code move to make_file_list_selectable)
 
@@ -233,6 +278,10 @@ file_js_onload = ->
       .error ->
         update_footer -3
 
+  # make directory
+  mkdir = ->
+    alert('pending')
+
   # refresh list
   refresh = ->
     if window.selected_items.length > 0
@@ -240,7 +289,7 @@ file_js_onload = ->
 
   menu_items =
     for_files: ['Open--','Move to Trash--','Get Info','Rename'],
-    for_lists: ['Undo--','Refresh--','Get Info','Settings'],
+    for_lists: ['Undo--','Make Directory--','Refresh--','Get Info','Settings'],
 
   menu_items_before_clicked =
     for_files: ->
@@ -254,7 +303,7 @@ file_js_onload = ->
 
   menu_items_clicked =
     for_files: [null, move_to_trash, null, null],
-    for_lists: [undo, refresh, null, null],
+    for_lists: [undo, mkdir, refresh, null, null],
 
   $(document).bind 'contextmenu', (e) ->
     if $('#context_menu').css('z-index') != '0'

@@ -121,6 +121,20 @@ class ManagerController < ApplicationController
     render nothing: true, status: 200
   end
 
+  def rename
+    from = params[:path]
+    to = params[:to]
+    if not to.nil?
+      to = File.join(File.dirname(from), File.basename(to).strip)
+    end
+    render nothing: true, status: 500 and return if move_file(from, to) == false
+    render json: { undo: {
+        name: "Rename of #{File.basename(from)}",
+        action: "#{rename_files_path(to)}",
+        parameters: { _method: 'put', to: File.basename(from).strip }
+    }}
+  end
+
   private
 
     def get_path(path)
