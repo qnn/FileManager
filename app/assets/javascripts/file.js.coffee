@@ -272,12 +272,18 @@ file_js_onload = ->
         li.addClass('bottom-separator')
       li.append('<a href="#">'+b+'</a>')
       $('#menu').append(li)
+    x = e.pageX - 17
+    if x + $('#context_menu').outerWidth() > $(window).width()
+      x = $(window).width() - $('#context_menu').outerWidth()
+    y = e.pageY - 10
     $('#context_menu').show().css({
       height: $('#menu').outerHeight() + 20,
       top: e.pageY - 10,
-      left: e.pageX - 17,
+      left: x,
       'z-index': 20
     })
+    if (y + $('#context_menu').height() > $(window).height())
+      $('#context_menu').css({ top: $(window).height() - $('#context_menu').height() })
     menu_items_before_clicked[type]()
 
   hide_context_menu = ->
