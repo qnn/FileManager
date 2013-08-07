@@ -18,6 +18,7 @@ file_js_onload = ->
     "Fail to move this file to trash.",         # -2
     "Fail to complete the undo request.",       # -3
     "Fail to rename this file.",                # -4
+    "Fail to create new directory/file.",       # -5
   ]
 
   update_footer = (number_of_files, number_of_dirs) ->
@@ -172,10 +173,13 @@ file_js_onload = ->
 
   # saving renames
   save_renames = ->
-    $('input.rename').each ->
+    $('input.rename.renaming').each ->
       input = $(this)
       val = input.val().trim()
-      path = input.closest('a.file').data('path')
+      file = input.closest('a.file')
+      is_new = file.hasClass('new')
+      is_dir = file.hasClass('dir')
+      path = file.data('path')
 
       if val == input.data('name') or val == ''
         cancel_renames()
@@ -185,22 +189,40 @@ file_js_onload = ->
       input.closest('ul.column').find('a.file').each ->
         if $('.name', this).text() == val
           already_exists = true
-      if already_exists and not confirm('The file name "'+val+'" is already taken. Are you sure you want to overwrite the file?')
+      if is_new and already_exists and not confirm('The file name "'+val+'" is already taken.')
+        return
+      if not is_new and already_exists and not confirm('The file name "'+val+'" is already taken. Are you sure you want to overwrite the file?')
         return
 
-      $.post(window.routes.rename_files_path.replace('/:path', path), {
-        _method: 'put',
-        to: val
-      }).success (d) ->
-        window.available_undos.unshift d
-        load_file_list input.closest('ul.column')
-      .error ->
-        update_footer -4
+      input.removeClass('renaming') # prevent re-submit
+      if is_new
+        $.post(window.routes.make_directory_path.replace('/:path', path + '/' + val), {
+          _method: 'post'
+        }).success (d) ->
+          window.available_undos.unshift d
+          load_file_list input.closest('ul.column')
+        .error ->
+          input.addClass('renaming')
+          update_footer -5
+      else
+        $.post(window.routes.rename_files_path.replace('/:path', path), {
+          _method: 'put',
+          to: val
+        }).success (d) ->
+          window.available_undos.unshift d
+          load_file_list input.closest('ul.column')
+        .error ->
+          input.addClass('renaming')
+          update_footer -4
 
   # clearing rename inputs
   cancel_renames = ->
-    $('input.rename').replaceWith ->
-      $(this).data('name')
+    $('input.rename').each ->
+      if $(this).closest('a.file').hasClass('new')
+        $(this).closest('li').remove()
+      else
+        $(this).replaceWith ->
+          $(this).data('name')
 
   # show rename input box
   show_renames = ->
@@ -215,7 +237,7 @@ file_js_onload = ->
           e.stopPropagation()
         input.data('name', last_selected.find('span.name').text())
         last_selected.find('span.name').html(input)
-        input.addClass('rename')
+        input.addClass('rename renaming')
         input.val(input.data('name')).select()
       else
         save_renames()
@@ -299,7 +321,13 @@ file_js_onload = ->
 
   # make directory
   mkdir = ->
-    alert('pending')
+    current_list = window.selected_items.eq(0).find('ul.column')
+    anchor = $('<a />', {
+      class: 'file dir active new',
+      html: '<span class="icon"></span><span class="name"></span>'
+    })
+    anchor.data('path', current_list.data('ls-path'))
+    current_list.append($('<li />').append(anchor))
 
   # refresh list
   refresh = ->
@@ -324,6 +352,13 @@ file_js_onload = ->
     for_files: [null, move_to_trash, null, null],
     for_lists: [undo, mkdir, refresh, null, null],
 
+  menu_items_after_clicked =
+    for_files: ->
+      null
+    for_lists: (index) ->
+      switch index
+        when 1 then show_renames()
+
   $(document).bind 'contextmenu', (e) ->
     if $('#context_menu').css('z-index') != '0'
       hide_context_menu()
@@ -337,6 +372,7 @@ file_js_onload = ->
     if func != null
       func();
     hide_context_menu()
+    menu_items_after_clicked[$('#menu').data('type')](index)
 
   $(document).bind 'click', (e) ->
     hide_context_menu()

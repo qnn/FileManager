@@ -69,6 +69,17 @@ class ManagerController < ApplicationController
     render json: {file: File.join(get_path(path), upload_file.original_filename)}
   end
 
+  def mkdir
+    path = params[:path] || '/'
+    new_dir_path = get_path(path)
+    render nothing: true, status: 500 and return unless make_directory(new_dir_path)
+    render json: { undo: {
+      name: "Make of #{File.basename(path)}",
+      action: "#{remove_files_path(path)}",
+      parameters: { _method: 'delete' }
+    }}
+  end
+
   # move one or more files in a directory to trash
   def rm
     path = params[:path] || '/'
@@ -185,4 +196,18 @@ class ManagerController < ApplicationController
       
       true
     end
+
+    def make_directory path
+      return false if File.exists?(path)
+      return false if File.directory?(path)
+
+      begin
+        Dir.mkdir path, 0700
+      rescue SystemCallError
+        return false
+      end
+
+      true
+    end
+
 end

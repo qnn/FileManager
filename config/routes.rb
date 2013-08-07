@@ -11,6 +11,9 @@ FileManager::Application.routes.draw do
   post 'upload' => 'manager#upload', as: :upload_files
   post 'upload/*path' => 'manager#upload', format: false
 
+  post 'mkdir/*path' => 'manager#mkdir', as: :make_directory, format: false
+  post 'touch/*path' => 'manager#touch', as: :touch_file, format: false
+
   put 'mv/*path' => 'manager#mv', as: :move_files, format: false
 
   put 'rename/*path' => 'manager#rename', as: :rename_files, format: false
