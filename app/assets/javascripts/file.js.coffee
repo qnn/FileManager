@@ -196,7 +196,11 @@ file_js_onload = ->
 
       input.removeClass('renaming') # prevent re-submit
       if is_new
-        $.post(window.routes.make_directory_path.replace('/:path', path + '/' + val), {
+        if is_dir
+          post_path = window.routes.make_directory_path.replace('/:path', path + '/' + val)
+        else
+          post_path = window.routes.touch_file_path.replace('/:path', path + '/' + val)
+        $.post(post_path, {
           _method: 'post'
         }).success (d) ->
           window.available_undos.unshift d
@@ -325,11 +329,13 @@ file_js_onload = ->
       .error ->
         update_footer -3
 
-  # make directory
+  # make file/directory
   mkdir = ->
+    mkfile true
+  mkfile = (is_dir) ->
     current_list = window.selected_items.eq(0).find('ul.column')
     anchor = $('<a />', {
-      class: 'file dir active new',
+      class: 'file '+(if is_dir==true then 'dir' else 'not_dir')+' active new',
       html: '<span class="icon"></span><span class="name"></span>'
     })
     anchor.data('path', current_list.data('ls-path'))
@@ -342,7 +348,7 @@ file_js_onload = ->
 
   menu_items =
     for_files: ['Open--','Move to Trash--','Get Info','Rename'],
-    for_lists: ['Undo--','Make Directory--','Refresh--','Get Info','Settings'],
+    for_lists: ['Undo--','Make Directory','Create Empty File--','Refresh--','Get Info','Settings'],
 
   menu_items_before_clicked =
     for_files: ->
@@ -356,14 +362,14 @@ file_js_onload = ->
 
   menu_items_clicked =
     for_files: [null, move_to_trash, null, null],
-    for_lists: [undo, mkdir, refresh, null, null],
+    for_lists: [undo, mkdir, mkfile, refresh, null, null],
 
   menu_items_after_clicked =
     for_files: ->
       null
     for_lists: (index) ->
       switch index
-        when 1 then show_renames()
+        when 1, 2 then show_renames()
 
   $(document).bind 'contextmenu', (e) ->
     if $('#context_menu').css('z-index') != '0'

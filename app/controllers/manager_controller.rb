@@ -80,6 +80,17 @@ class ManagerController < ApplicationController
     }}
   end
 
+  def touch
+    path = params[:path] || '/'
+    new_file_path = get_path(path)
+    render nothing: true, status: 500 and return unless make_file(new_file_path)
+    render json: { undo: {
+      name: "Make of #{File.basename(path)}",
+      action: "#{remove_files_path(path)}",
+      parameters: { _method: 'delete' }
+    }}
+  end
+
   # move one or more files in a directory to trash
   def rm
     path = params[:path] || '/'
@@ -204,6 +215,20 @@ class ManagerController < ApplicationController
       begin
         Dir.mkdir path, 0700
       rescue SystemCallError
+        return false
+      end
+
+      true
+    end
+
+    def make_file path
+      return false if File.exists?(path)
+      return false if File.file?(path)
+
+      require 'fileutils'
+      begin
+        FileUtils.touch(path)
+      rescue Errno::EACCES
         return false
       end
 
