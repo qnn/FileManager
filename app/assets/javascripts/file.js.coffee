@@ -455,7 +455,7 @@ file_js_onload = ->
     $('#columns ul.columns').slimScrollHorizontal({ width: 'auto' })
   resize_columns()
   scroll_columns_to_right()
-  $(window).resize ->
+  $(window).on 'throttledresize', ->
     resize_columns()
 
 $(file_js_onload)
