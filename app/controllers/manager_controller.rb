@@ -15,18 +15,24 @@ class ManagerController < ApplicationController
           session_path.split(File::SEPARATOR).each do |_path|
             path = File.join(path, _path)
             break unless Dir.exist?(get_path(path))
-            @ls_paths << path.chomp('/')
+            @ls_paths << path.chomp('/')  # load last-opened paths
           end
         end
       end
 
     else  #  not at root path: /open/
       redirect_to root_path and return if path == '/'  #  /open/ redirects to root
-      unless Dir.exist?(get_path(path))  #  dir does not exist
-        _path = get_path(path)
+      _path = get_path(path)
+
+      if File.file?(_path)
+        send_file(_path)  # download file
+        return
+      end
+
+      unless Dir.exist?(_path)  #  dir does not exist
         begin
           _path = File.expand_path("..", _path)
-        end while not Dir.exist?(_path)
+        end while not Dir.exist?(_path) # find which parent exists
         _path.sub!(get_path('/').chomp('/'), '')
         redirect_to File.join(open_files_path, _path) and return
       end

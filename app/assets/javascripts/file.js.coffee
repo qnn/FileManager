@@ -125,7 +125,9 @@ file_js_onload = ->
             update_current_path_and_title column.data('ls-path')
             update_footer column.find('a.file').length, column.find('a.file.dir').length
           if window.last_clicked_list_item && selected[0] == window.last_clicked_list_item.selected[0] && event.timeStamp - window.last_clicked_list_item.timeStamp <= 3000
-            show_renames()
+            # clicking too fast is 'double click'
+            if event.timeStamp - window.last_clicked_list_item.timeStamp > 500
+              show_renames()
           else
             window.last_clicked_list_item = { selected: selected, timeStamp: event.timeStamp }
     })
@@ -294,6 +296,10 @@ file_js_onload = ->
     save_renames()
     $('#context_menu').css({ 'z-index': 0 }).hide()
 
+  open = ->
+    first = window.selected_items.eq(0)
+    first.trigger('dblclick')
+
   # move one or more files in a directory to trash
   move_to_trash = ->
     first = window.selected_items.eq(0)
@@ -315,6 +321,9 @@ file_js_onload = ->
         load_file_list first.closest('ul.column')
       .error ->
         update_footer -2
+
+  rename = ->
+    show_renames()
 
   window.available_undos = []
   # undo
@@ -361,12 +370,13 @@ file_js_onload = ->
         $('#menu li:first').removeClass('disabled').find('a').text(text).attr('title', text)
 
   menu_items_clicked =
-    for_files: [null, move_to_trash, null, null],
+    for_files: [open, move_to_trash, null, null],
     for_lists: [undo, mkdir, mkfile, refresh, null, null],
 
   menu_items_after_clicked =
-    for_files: ->
-      null
+    for_files: (index) ->
+      switch index
+        when 3 then show_renames()
     for_lists: (index) ->
       switch index
         when 1, 2 then show_renames()
