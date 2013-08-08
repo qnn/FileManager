@@ -14,11 +14,11 @@ file_js_onload = ->
   update_current_path_and_title '/'
 
   window.error_msgs = [
-    "Fail to open this folder.",                # -1
-    "Fail to move this file to trash.",         # -2
-    "Fail to complete the undo request.",       # -3
-    "Fail to rename this file.",                # -4
-    "Fail to create new directory/file.",       # -5
+    "Fail to open this folder."                # -1
+    "Fail to move this file to trash."         # -2
+    "Fail to complete the undo request."       # -3
+    "Fail to rename this file."                # -4
+    "Fail to create new directory/file."       # -5
   ]
 
   update_footer = (number_of_files, number_of_dirs) ->
@@ -62,11 +62,10 @@ file_js_onload = ->
           dir_count += 1
         else
           type = "not_dir"
-        anchor = $('<a />', {
-          class: 'file '+type,
-          href: '/open'+path+encodeURIComponent(b.name),
+        anchor = $ '<a />',
+          class: 'file '+type
+          href: '/open'+path+encodeURIComponent(b.name)
           html: '<span class="icon"></span><span class="name">'+b.name+'</span>'
-        })
         anchor.data('path', path+b.name)
         column_element.append($('<li />').append(anchor))
         file_count += 1
@@ -75,7 +74,9 @@ file_js_onload = ->
           anchor.addClass('active')
           if anchor.position().top > column_height - 20 # scroll to visible area
               should_scroll_to = anchor.position().top - column_height / 2
-      column_element.slimScroll({ height: window.column_height, scrollTo: should_scroll_to })
+      column_element.slimScroll
+        height: window.column_height
+        scrollTo: should_scroll_to
       update_footer file_count, dir_count
     .error -> # error getting ls json
       update_footer -1
@@ -99,18 +100,18 @@ file_js_onload = ->
       e.stopPropagation()
       hide_context_menu()
       $(this).nextAll('li').remove()
-    .selectable({
+    .selectable
       filter: 'li'
-      , selecting: (event, ui) ->
+      selecting: (event, ui) ->
         $(ui.selecting).find('a.file').addClass('active')
-      , unselecting: (event, ui) ->
+      unselecting: (event, ui) ->
         $(ui.unselecting).find('a.file').removeClass('active')
-      , start: (event, ui) ->
+      start: (event, ui) ->
         hide_context_menu()
         # pressing command or ctrl key to select multiple items
         if event.metaKey == false and event.ctrlKey == false
           $(this).find('a.file').removeClass('active')
-      , stop: (event, ui) ->
+      stop: (event, ui) ->
         column = $(this)
         selected = column.find('.ui-selectee.ui-selected')
         # clicking on one item
@@ -130,14 +131,12 @@ file_js_onload = ->
               show_renames()
           else
             window.last_clicked_list_item = { selected: selected, timeStamp: event.timeStamp }
-    })
 
   make_file_list_uploadable = (element) ->
-    dropzone = new Dropzone(element[0], {
-      url: "/upload" + element.data('ls-path'),
-      clickable: false,
+    dropzone = new Dropzone element[0],
+      url: "/upload" + element.data('ls-path')
+      clickable: false
       previewTemplate: '<li><a class="file not_dir" href="#"><span class="icon"></span><span class="dz-filename" data-dz-name></span><span class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></span><span class="dz-hidden dz-size" data-dz-size data-dz-errormessage></span><img data-dz-thumbnail class="dz-hidden" /></a></li>'
-    })
     dropzone.on "sending", (file, xhr, formData) ->
       xhr.setRequestHeader 'X-CSRF-Token', $('meta[name="csrf-token"]').attr('content')
     dropzone.on "success", ->
@@ -202,19 +201,19 @@ file_js_onload = ->
           post_path = window.routes.make_directory_path.replace('/:path', path + '/' + val)
         else
           post_path = window.routes.touch_file_path.replace('/:path', path + '/' + val)
-        $.post(post_path, {
+        $.post post_path,
           _method: 'post'
-        }).success (d) ->
+        .success (d) ->
           window.available_undos.unshift d
           load_file_list input.closest('ul.column')
         .error ->
           input.addClass('renaming')
           update_footer -5
       else
-        $.post(window.routes.rename_files_path.replace('/:path', path), {
-          _method: 'put',
+        $.post window.routes.rename_files_path.replace('/:path', path),
+          _method: 'put'
           to: val
-        }).success (d) ->
+        .success (d) ->
           window.available_undos.unshift d
           load_file_list input.closest('ul.column')
         .error ->
@@ -282,14 +281,14 @@ file_js_onload = ->
     if x + $('#context_menu').outerWidth() > $(window).width()
       x = $(window).width() - $('#context_menu').outerWidth()
     y = e.pageY - 10
-    $('#context_menu').show().css({
-      height: $('#menu').outerHeight() + 20,
-      top: e.pageY - 10,
-      left: x,
+    $('#context_menu').show().css
+      height: $('#menu').outerHeight() + 20
+      top: e.pageY - 10
+      left: x
       'z-index': 20
-    })
     if (y + $('#context_menu').height() > $(window).height())
-      $('#context_menu').css({ top: $(window).height() - $('#context_menu').height() })
+      $('#context_menu').css
+        top: $(window).height() - $('#context_menu').height()
     menu_items_before_clicked[type]()
 
   hide_context_menu = ->
@@ -314,9 +313,11 @@ file_js_onload = ->
         files = null
       else
         files = { files: files }
-      $.post(window.routes.remove_files_path.replace('/:path', path), $.extend({
-        _method: 'delete'
-      }, files)).success (d) ->
+      $.post window.routes.remove_files_path.replace('/:path', path),
+        $.extend
+          _method: 'delete'
+        , files
+      .success (d) ->
         window.available_undos.unshift d
         load_file_list first.closest('ul.column')
       .error ->
@@ -343,10 +344,9 @@ file_js_onload = ->
     mkfile true
   mkfile = (is_dir) ->
     current_list = window.selected_items.eq(0).find('ul.column')
-    anchor = $('<a />', {
-      class: 'file '+(if is_dir==true then 'dir' else 'not_dir')+' active new',
+    anchor = $ '<a />',
+      class: 'file '+(if is_dir==true then 'dir' else 'not_dir')+' active new'
       html: '<span class="icon"></span><span class="name"></span>'
-    })
     anchor.data('path', current_list.data('ls-path'))
     current_list.append($('<li />').append(anchor))
 
@@ -356,8 +356,20 @@ file_js_onload = ->
       load_file_list window.selected_items.eq(0).find('ul.column')
 
   menu_items =
-    for_files: ['Open--','Move to Trash--','Get Info','Rename'],
-    for_lists: ['Undo--','Make Directory','Create Empty File--','Refresh--','Get Info','Settings'],
+    for_files: [
+      'Open--'
+      'Move to Trash--'
+      'Get Info'
+      'Rename'
+    ]
+    for_lists: [
+      'Undo--'
+      'Make Directory'
+      'Create Empty File--'
+      'Refresh--'
+      'Get Info'
+      'Settings'
+    ]
 
   menu_items_before_clicked =
     for_files: ->
@@ -370,8 +382,20 @@ file_js_onload = ->
         $('#menu li:first').removeClass('disabled').find('a').text(text).attr('title', text)
 
   menu_items_clicked =
-    for_files: [open, move_to_trash, null, null],
-    for_lists: [undo, mkdir, mkfile, refresh, null, null],
+    for_files: [
+      open
+      move_to_trash
+      null
+      null
+    ]
+    for_lists: [
+      undo
+      mkdir
+      mkfile
+      refresh
+      null
+      null
+    ]
 
   menu_items_after_clicked =
     for_files: (index) ->
@@ -407,12 +431,11 @@ file_js_onload = ->
   resize_columns = ->
     parent = $('#columns_container')
     window.column_height = parent.height()
-    $('#columns').css({
-      top: parent.position().top,
-      left: parent.position().left,
-      width: parent.width(),
+    $('#columns').css
+      top: parent.position().top
+      left: parent.position().left
+      width: parent.width()
       height: window.column_height
-    })
     $('#columns ul.columns > li').height(window.column_height)
     $('#columns ul.column').slimScroll({ height: 'auto' })
     $('#columns ul.columns').slimScrollHorizontal({ width: 'auto' })
