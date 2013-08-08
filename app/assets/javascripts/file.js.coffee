@@ -9,7 +9,8 @@ file_js_onload = ->
   update_current_path_and_title = (path) ->
     window.current_path = path
     if path == '' then path = '/'
-    $('#title').text('FileManager - ' + path)
+    text = 'FileManager - ' + path
+    $('#title').attr('title', text).text(text)
 
   update_current_path_and_title '/'
 
@@ -100,7 +101,6 @@ file_js_onload = ->
       e.preventDefault()
       e.stopPropagation()
       hide_context_menu()
-      $(this).nextAll('li').remove()
     .selectable
       filter: 'li'
       selecting: (event, ui) ->
@@ -112,6 +112,7 @@ file_js_onload = ->
         # pressing command or ctrl key to select multiple items
         if event.metaKey == false and event.ctrlKey == false
           $(this).find('a.file').removeClass('active')
+          $(this).closest('li').nextAll('li').remove()
       stop: (event, ui) ->
         column = $(this)
         selected = column.find('.ui-selectee.ui-selected')
@@ -317,6 +318,7 @@ file_js_onload = ->
         $.extend options.additional_params, files
       .success (d) ->
         window.available_undos.unshift d
+        first.closest('ul.column').closest('li').nextAll('li').remove()
         load_file_list first.closest('ul.column')
       .error ->
         update_footer options.error_msg_no
