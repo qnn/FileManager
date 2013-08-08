@@ -19,6 +19,7 @@ file_js_onload = ->
     "Fail to complete the undo request."       # -3
     "Fail to rename this file."                # -4
     "Fail to create new directory/file."       # -5
+    "Fail to duplicate directories/files."     # -6
   ]
 
   update_footer = (number_of_files, number_of_dirs) ->
@@ -299,8 +300,7 @@ file_js_onload = ->
     first = window.selected_items.eq(0)
     first.trigger('dblclick')
 
-  # move one or more files in a directory to trash
-  move_to_trash = ->
+  collection_action = (options) ->
     first = window.selected_items.eq(0)
     path = first.closest('ul.column').data('ls-path')
     files = []
@@ -313,15 +313,27 @@ file_js_onload = ->
         files = null
       else
         files = { files: files }
-      $.post window.routes.remove_files_path.replace('/:path', path),
-        $.extend
-          _method: 'delete'
-        , files
+      $.post options.base_path.replace('/:path', path),
+        $.extend options.additional_params, files
       .success (d) ->
         window.available_undos.unshift d
         load_file_list first.closest('ul.column')
       .error ->
-        update_footer -2
+        update_footer options.error_msg_no
+
+  # move one or more files in a directory to trash
+  move_to_trash = ->
+    collection_action
+      base_path:          window.routes.remove_files_path
+      additional_params:
+        _method: 'delete'
+      error_msg_no:       -2
+
+  duplicate = ->
+    collection_action
+      base_path:          window.routes.duplicate_files_path
+      additional_params:  {}
+      error_msg_no:       -6
 
   rename = ->
     show_renames()
@@ -359,7 +371,7 @@ file_js_onload = ->
     for_files: [
       'Open--'
       'Move to Trash--'
-      'Get Info'
+      'Duplicate'
       'Rename'
     ]
     for_lists: [
@@ -385,7 +397,7 @@ file_js_onload = ->
     for_files: [
       open
       move_to_trash
-      null
+      duplicate
       null
     ]
     for_lists: [

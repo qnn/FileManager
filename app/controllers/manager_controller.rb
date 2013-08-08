@@ -97,6 +97,41 @@ class ManagerController < ApplicationController
     }}
   end
 
+  def duplicate
+    path = params[:path] || '/'
+
+    if params.has_key?(:files) and params[:files].kind_of?(Array)
+      files = params[:files]
+      dests = []
+      files.each do |file|
+        dest = duplicate_file(File.join(path, file))
+        break if dest == false
+        dests << dest
+      end
+      render nothing: true, status: 500 and return if dests.empty?
+
+      parent = File.dirname(dests[0])
+      dests.map! do |dest|
+        File.basename(dest)
+      end
+      render json: { undo: {
+        name: "Duplicate of #{dests.length} files",
+        action: "#{remove_files_path(parent)}",
+        parameters: { _method: 'delete', files: dests }
+      }}
+    else # if to move one file to trash
+      dest = duplicate_file(path)
+
+      render nothing: true, status: 500 and return if dest == false
+
+      render json: { undo: {
+        name: "Duplicate of #{File.basename(path)}",
+        action: "#{remove_files_path(dest)}",
+        parameters: { _method: 'delete' }
+      }}
+    end
+  end
+
   # move one or more files in a directory to trash
   def rm
     path = params[:path] || '/'
@@ -126,9 +161,9 @@ class ManagerController < ApplicationController
       render nothing: true, status: 500 and return if dest == false
 
       render json: { undo: {
-          name: "Move of #{File.basename(path)}",
-          action: "#{move_files_path(dest)}",
-          parameters: { _method: 'put', to: path }
+        name: "Move of #{File.basename(path)}",
+        action: "#{move_files_path(dest)}",
+        parameters: { _method: 'put', to: path }
       }}
     end
   end
@@ -192,6 +227,34 @@ class ManagerController < ApplicationController
       end
 
       dest.sub(get_path(''), '')
+    end
+
+    def duplicate_file(path)
+      file = get_path(path)
+      return false unless File.exists?(file)
+
+      parent = File.expand_path('..', file)
+      return false unless File.exists?(parent)
+
+      ext = File.file?(path) ? File.extname(path) : ''
+      base = File.basename(file, ext)
+      base.sub!(/\scopy(\s\d+)?$/, '')
+      count = 1
+      begin
+        new_file = File.join(parent, base + " copy")
+        new_file << " #{count}" if count > 1
+        new_file << ext if ext.length > 0
+        count += 1
+      end while File.exists?(new_file)
+
+      require 'fileutils'
+      begin
+        FileUtils.cp_r file, new_file
+      rescue
+        return false
+      end
+
+      new_file.sub(get_path(''), '')
     end
 
     def move_file(from, to)
