@@ -221,7 +221,7 @@ class ManagerController < ApplicationController
 
       require 'fileutils'
       begin
-        FileUtils.mv source, dest
+        FileUtils.mv source, dest, force: true
       rescue
         return false
       end
